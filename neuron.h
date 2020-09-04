@@ -10,8 +10,8 @@ class Neuron{
 
     public:
         Neuron();
-        void addForward(Neuron *fw);
-        void addBackward(Neuron *bw);
+        void addForward(Neuron *f);
+        void addBackward(Neuron *b);
         void randInitWeightBias();
         float getBias(uint16_t i);
         float getWeight();

@@ -8,12 +8,12 @@ Neuron::Neuron(){
 
 }
 
-void Neuron::addForward(Neuron *fw){
-
+void Neuron::addForward(Neuron *f){
+    fw.push_back(f);
 }
 
-void Neuron::addBackward(Neuron *bw){
-
+void Neuron::addBackward(Neuron *b){
+    bw.push_back(b);
 }
 
 float Neuron::getBias(uint16_t i){
@@ -25,8 +25,11 @@ float Neuron::getWeight(){
 }
 
 void Neuron::randInitWeightBias(){
+    float rand;
     for (int i = 0; i < fw.size(); i++){
-        float rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
+        rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
         bias.push_back(rand);
     }
+    rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
+    weight = rand;
 }

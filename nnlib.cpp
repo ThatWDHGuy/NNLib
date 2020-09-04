@@ -34,5 +34,14 @@ void NNLib::makeLinks(Mode m){
 
 
 void NNLib::setAllForward(){
-    
+    for (int l = 0; l < net.size()-1; l++){
+        for (int nStart = 0; nStart < net.at(l).size(); nStart++){
+            Neuron *start = net.at(l).at(nStart);
+            for (int nEnd = 0; nEnd < net.at(l+1).size(); nEnd++){
+                Neuron *end = net.at(l+1).at(nEnd);
+                start->addForward(end);
+                end->addBackward(start);
+            }
+        }
+    }
 }
