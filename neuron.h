@@ -12,6 +12,7 @@ class Neuron{
         Neuron();
         void addForward(Neuron *fw);
         void addBackward(Neuron *bw);
+        void randInitWeightBias();
         float getBias(uint16_t i);
         float getWeight();
 

@@ -6,5 +6,7 @@ int main(void){
     NNLib nn = NNLib();
     std::vector<uint8_t> i{16,32,64,128,8}; 
     nn.setLayers(&i);
+    nn.makeLinks(nn.ALL);
+    nn.randWeightBias();
     return 0;
 }

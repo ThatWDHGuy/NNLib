@@ -15,3 +15,24 @@ void NNLib::setLayers(std::vector<uint8_t>* lays){
         net.push_back(layer);
     }
 }
+
+void NNLib::randWeightBias(){
+    for (int l = 0; l < net.size(); l++){
+        for (int n = 0; n < net.at(l).size(); n++){
+            Neuron *neu = net.at(l).at(n);
+            neu->randInitWeightBias();
+        }
+    }
+}
+void NNLib::makeLinks(Mode m){
+    switch (m){
+    case ALL:
+        setAllForward();
+        break;
+    }
+}
+
+
+void NNLib::setAllForward(){
+    
+}
