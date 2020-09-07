@@ -5,12 +5,13 @@
 class NNLib{
     private:
         std::vector<std::vector<Neuron*>> net;
-        void setAllForward();
+        void linkAllForward();
     public:
         NNLib();
         void setLayers(std::vector<uint8_t>* lays);
         void randWeightBias();
         enum Mode {ALL};
         void makeLinks(Mode m);
+        void printNet();
         
 };

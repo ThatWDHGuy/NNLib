@@ -15,5 +15,7 @@ class Neuron{
         void randInitWeightBias();
         float getBias(uint16_t i);
         float getWeight();
-
+        std::vector<Neuron*>* getFw();
+        std::vector<Neuron*>* getBw();
+        std::vector<float>* getBias();
 };
