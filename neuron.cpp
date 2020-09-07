@@ -1,5 +1,7 @@
-#include <cstdlib>
+#include <iostream>
 #include "neuron.h"
+#include <cstdlib>
+#include <ctime>
 
 #define MIN -3
 #define MAX 3
@@ -16,12 +18,12 @@ void Neuron::addBackward(Neuron *b){
     bw.push_back(b);
 }
 
-float Neuron::getBias(uint16_t i){
-    return bias.at(i);
+float Neuron::getWeight(int i){
+    return weights.at(i);
 }
 
-float Neuron::getWeight(){
-    return weight;
+float Neuron::getBias(){
+    return bias;
 }
 
 std::vector<Neuron*>* Neuron::getFw(){
@@ -32,15 +34,39 @@ std::vector<Neuron*>* Neuron::getBw(){
     return &bw;
 }
 
-std::vector<float>* Neuron::getBias(){
-    return &bias;
+std::vector<float>* Neuron::getWeights(){
+    return &weights;
+}
+
+float Neuron::getRand(){
+    float a = ((float)rand()/RAND_MAX)*6 - 3;
+    return a;
 }
 
 void Neuron::randInitWeightBias(){
+    float rand;
     for (int i = 0; i < fw.size(); i++){
-        rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
-        bias.push_back(rand);
+        weights.push_back(getRand());
     }
-    rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
-    weight = rand;
+    bias = getRand();
+}
+
+void Neuron::randInitBias(){
+    float rand;
+    for (int i = 0; i < fw.size(); i++){
+        weights.push_back(getRand());
+    }
+    bias = 0;
+}
+
+void Neuron::setVal(float v){
+    val = v;
+}
+
+void Neuron::addVal(float v){
+    val += v;
+}
+
+float Neuron::getVal(){
+    return val;
 }
