@@ -24,8 +24,19 @@ float Neuron::getWeight(){
     return weight;
 }
 
+std::vector<Neuron*>* Neuron::getFw(){
+    return &fw;
+}
+
+std::vector<Neuron*>* Neuron::getBw(){
+    return &bw;
+}
+
+std::vector<float>* Neuron::getBias(){
+    return &bias;
+}
+
 void Neuron::randInitWeightBias(){
-    float rand;
     for (int i = 0; i < fw.size(); i++){
         rand = MIN + static_cast <float> (std::rand()) /( static_cast <float> (RAND_MAX/(MAX-MIN)));
         bias.push_back(rand);

@@ -1,5 +1,8 @@
 #include "nnlib.h"
 #include <iostream>
+#include <filesystem>
+#include <string>
+namespace fs = std::filesystem;
 
 NNLib::NNLib(){
 
@@ -27,21 +30,48 @@ void NNLib::randWeightBias(){
 void NNLib::makeLinks(Mode m){
     switch (m){
     case ALL:
-        setAllForward();
+        linkAllForward();
         break;
     }
 }
 
 
-void NNLib::setAllForward(){
+void NNLib::linkAllForward(){
+    //link all nodes forward
     for (int l = 0; l < net.size()-1; l++){
-        for (int nStart = 0; nStart < net.at(l).size(); nStart++){
-            Neuron *start = net.at(l).at(nStart);
-            for (int nEnd = 0; nEnd < net.at(l+1).size(); nEnd++){
-                Neuron *end = net.at(l+1).at(nEnd);
-                start->addForward(end);
-                end->addBackward(start);
+        for (int n = 0; n < net.at(l).size(); n++){
+            Neuron *current = net.at(l).at(n);
+            for (int nn = 0; nn < net.at(l+1).size(); nn++){
+                Neuron *next = net.at(l+1).at(nn);
+                current->getFw()->push_back(next);
+                next->getBw()->push_back(current);
             }
         }
     }
+}
+
+void NNLib::printNet(){
+    for (int l = 0; l < net.size(); l++){
+        for (int n = 0; n < net.at(l).size(); n++){
+            Neuron *neu = net.at(l).at(n);
+            std::cout<<l<<" "<<n<<" : "<<neu<<"\n\t"<<neu->getWeight()<<"\n\tfw:"<<std::endl;
+            for (int i = 0; i < neu->getFw()->size(); i++){
+                std::cout<<"\t\t"<<neu->getFw()->at(i)<<" "<<neu->getBias()->at(i)<<std::endl;
+            }
+            std::cout<<"\tbw:"<<std::endl;
+            for (int i = 0; i < neu->getBw()->size(); i++){
+                std::cout<<"\t\t"<<neu->getBw()->at(i)<<std::endl;
+            }
+        }
+    }
+}
+
+void NNLib::loadTrainingSet(){//TrainItem func(void)){
+    std::string path = "training";
+    for (const auto & entry : fs::directory_iterator(path))
+        std::cout << entry.path() << std::endl;
+}
+
+void NNLib::trainNet(float maxError, int maxIterations){
+
 }

@@ -4,13 +4,10 @@
 
 int main(void){
     NNLib nn = NNLib();
-    std::vector<uint8_t> i{16,32,64,128,8};
-    std::cout<<"Starting net creation"<<std::endl;
+    /*std::vector<uint8_t> i{2,2,1}; 
     nn.setLayers(&i);
-    std::cout<<"Layers made"<<std::endl;
     nn.makeLinks(nn.ALL);
-    std::cout<<"Links made"<<std::endl;
-    nn.randWeightBias();
-    std::cout<<"Weights and bias set"<<std::endl;
+    nn.randWeightBias();*/
+    nn.loadTrainingSet();
     return 0;
 }
