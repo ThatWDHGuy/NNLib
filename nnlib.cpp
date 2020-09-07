@@ -1,5 +1,8 @@
 #include "nnlib.h"
 #include <iostream>
+#include <filesystem>
+#include <string>
+namespace fs = std::filesystem;
 
 NNLib::NNLib(){
 
@@ -61,4 +64,14 @@ void NNLib::printNet(){
             }
         }
     }
+}
+
+void NNLib::loadTrainingSet(){//TrainItem func(void)){
+    std::string path = "training";
+    for (const auto & entry : fs::directory_iterator(path))
+        std::cout << entry.path() << std::endl;
+}
+
+void NNLib::trainNet(float maxError, int maxIterations){
+
 }

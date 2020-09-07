@@ -1,6 +1,7 @@
 #include <vector>
 #include "neuron.h"
 #include <stdint.h>
+#include "trainitem.h"
 
 class NNLib{
     private:
@@ -13,5 +14,6 @@ class NNLib{
         enum Mode {ALL};
         void makeLinks(Mode m);
         void printNet();
-        
+        void loadTrainingSet();//TrainItem func(void));
+        void trainNet(float maxError, int maxIterations);
 };
