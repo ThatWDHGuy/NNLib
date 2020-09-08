@@ -1,14 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <ctime>
 #include "nnlib.h"
 
 
 TrainItem* processData(std::string file){
     TrainItem* item = new TrainItem();
-    std::vector<int> in;
-    std::vector<int> out;
+    std::vector<float> in;
+    std::vector<float> out;
     std::ifstream tFile(file, std::ios_base::in);
     float a;
     int c = 0;
@@ -16,9 +15,9 @@ TrainItem* processData(std::string file){
     while (tFile >> a)
     {
         if (c < numInputs){
-            in.push_back((int)a);
+            in.push_back((float)a);
         } else {
-            out.push_back((int)a);
+            out.push_back((float)a);
         }
         c++;
     }
@@ -27,7 +26,6 @@ TrainItem* processData(std::string file){
 }
 
 int main(void){
-    srand (time(NULL));
     NNLib nn = NNLib();
     std::vector<int> i{2,2,1}; 
     nn.setLayers(&i);
@@ -35,17 +33,18 @@ int main(void){
     nn.randWeightBias();
     nn.printNet();
     nn.loadTrainingSet(&processData);
+    nn.trainNet(10.0, 5000);
     /*for (int i = 0; i < nn.getTraining()->size(); i++){
         std::cout<<i<<std::endl;
         nn.getTraining()->at(i)->print();
     }*/
     std::vector<float> in{0.0, 0.0}; 
-    nn.evaluateInput(&in);
+    //nn.forwardProp(&in);
     std::vector<float> in2{1.0, 0.0}; 
-    nn.evaluateInput(&in2);
+    //nn.evaluateInput(&in2);
     std::vector<float> in3{0.0, 1.0}; 
-    nn.evaluateInput(&in3);
+    //nn.evaluateInput(&in3);
     std::vector<float> in4{1.0, 1.0}; 
-    nn.evaluateInput(&in4);
+    //nn.evaluateInput(&in4);
     return 0;
 }

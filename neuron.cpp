@@ -26,6 +26,14 @@ float Neuron::getBias(){
     return bias;
 }
 
+void Neuron::setWeight(int i, float v){
+    weights.at(i) = v;
+}
+
+void Neuron::setBias(float v){
+    bias = v;
+}
+
 std::vector<Neuron*>* Neuron::getFw(){
     return &fw;
 }
@@ -47,16 +55,20 @@ void Neuron::randInitWeightBias(){
     float rand;
     for (int i = 0; i < fw.size(); i++){
         weights.push_back(getRand());
+        d_weights.push_back(0);
     }
     bias = getRand();
+    d_bias = 0;
 }
 
 void Neuron::randInitBias(){
     float rand;
     for (int i = 0; i < fw.size(); i++){
         weights.push_back(getRand());
+        d_weights.push_back(0);
     }
     bias = 0;
+    d_bias = 0;
 }
 
 void Neuron::setVal(float v){
@@ -69,4 +81,40 @@ void Neuron::addVal(float v){
 
 float Neuron::getVal(){
     return val;
+}
+
+std::vector<float>* Neuron::getD_Weights(){
+    return &d_weights;
+}
+
+float Neuron::getD_Weight(int i){
+    return d_weights.at(i);
+}
+
+float Neuron::getD_Bias(){
+    return d_bias;
+}
+
+void Neuron::setD_Weight(int i, float v){
+    d_weights.at(i) = v;
+}
+
+void Neuron::setD_Bias(float v){
+    d_bias = v;
+}
+
+float Neuron::getDelta(){
+    return delta;
+}
+
+void Neuron::setDelta(float v){
+    delta = v;
+}
+
+float Neuron::getError(){
+    return error;
+}
+
+void Neuron::setError(float v){
+    error = v;
 }

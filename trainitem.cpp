@@ -4,16 +4,16 @@
 TrainItem::TrainItem(){
 }
 
-void TrainItem::setInOut(std::vector<int> input, std::vector<int> output){
+void TrainItem::setInOut(std::vector<float> input, std::vector<float> output){
     inputs = input;
     outputs = output;
 }
 
-std::vector<int>* TrainItem::getInputs(){
+std::vector<float>* TrainItem::getInputs(){
     return &inputs;
 }
 
-std::vector<int>* TrainItem::getOutputs(){
+std::vector<float>* TrainItem::getOutputs(){
     return &outputs;
 }
 
