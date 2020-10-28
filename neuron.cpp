@@ -47,12 +47,11 @@ std::vector<float>* Neuron::getWeights(){
 }
 
 float Neuron::getRand(){
-    float a = ((float)rand()/RAND_MAX)*6 - 3;
+    float a = ((float)rand()/RAND_MAX)*2 - 1;
     return a;
 }
 
 void Neuron::randInitWeightBias(){
-    float rand;
     for (int i = 0; i < fw.size(); i++){
         weights.push_back(getRand());
         d_weights.push_back(0);
@@ -62,7 +61,6 @@ void Neuron::randInitWeightBias(){
 }
 
 void Neuron::randInitBias(){
-    float rand;
     for (int i = 0; i < fw.size(); i++){
         weights.push_back(getRand());
         d_weights.push_back(0);

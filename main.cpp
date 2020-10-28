@@ -31,20 +31,44 @@ int main(void){
     nn.setLayers(&i);
     nn.makeLinks(nn.ALL);
     nn.randWeightBias();
+    
+    Neuron* neu = nn.getNet().at(0).at(0);
+    neu->setBias(0);
+    neu->setWeight(0, 1);
+    neu->setWeight(1, -1);
+    neu = nn.getNet().at(0).at(1);
+    neu->setBias(0);
+    neu->setWeight(0, 1);
+    neu->setWeight(1, -1);
+    neu = nn.getNet().at(1).at(0);
+    neu->setBias(0.5);
+    neu->setWeight(0, 1);
+    neu = nn.getNet().at(1).at(1);
+    neu->setBias(-1.5);
+    neu->setWeight(0, 1);
+    neu = nn.getNet().at(2).at(0);
+    neu->setBias(1.5);
+
+    nn.printNet();
+
+    /*nn.randWeightBias();
     nn.printNet();
     nn.loadTrainingSet(&processData);
-    nn.trainNet(10.0, 5000);
+    
+    nn.trainNet(0.01, 1000);*/
     /*for (int i = 0; i < nn.getTraining()->size(); i++){
         std::cout<<i<<std::endl;
         nn.getTraining()->at(i)->print();
     }*/
+
+    nn.printNet();
     std::vector<float> in{0.0, 0.0}; 
-    //nn.forwardProp(&in);
+    nn.getResults(&in);
     std::vector<float> in2{1.0, 0.0}; 
-    //nn.evaluateInput(&in2);
+    nn.getResults(&in2);
     std::vector<float> in3{0.0, 1.0}; 
-    //nn.evaluateInput(&in3);
+    nn.getResults(&in3);
     std::vector<float> in4{1.0, 1.0}; 
-    //nn.evaluateInput(&in4);
+    nn.getResults(&in4);
     return 0;
 }

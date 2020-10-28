@@ -30,6 +30,10 @@ void NNLib::setLayers(std::vector<int>* lays){
     }
 }
 
+std::vector<std::vector<Neuron*>> NNLib::getNet(){
+    return net;
+}
+
 void NNLib::randWeightBias(){
     for (int n = 0; n < net.at(0).size(); n++){
         Neuron *neu = net.at(0).at(n);
@@ -69,14 +73,11 @@ void NNLib::printNet(){
     for (int l = 0; l < net.size(); l++){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron *neu = net.at(l).at(n);
-            std::cout<<l<<" "<<n<<" : "<<neu<<"\n\t"<<neu->getBias()<<"\n\tfw:"<<std::endl;
+            std::cout<<l<<","<<n<<":\n Bias:\n  "<<neu->getBias()<<"\n Weights:"<<std::endl;
             for (int i = 0; i < neu->getFw()->size(); i++){
-                std::cout<<"\t\t"<<neu->getFw()->at(i)<<" "<<neu->getWeights()->at(i)<<std::endl;
+                std::cout<<"  "<<neu->getWeights()->at(i)<<std::endl;
             }
-            std::cout<<"\tbw:"<<std::endl;
-            for (int i = 0; i < neu->getBw()->size(); i++){
-                std::cout<<"\t\t"<<neu->getBw()->at(i)<<std::endl;
-            }
+            std::cout<<std::endl;
         }
     }
 }
@@ -104,62 +105,50 @@ float NNLib::totalDatasetError(){ // sum of errors for all rows of train data
 }
 
 void NNLib::trainNet(float maxError, int maxIterations){
-    float totalError;
     int iter = 0;
     dStep = 0.01;  // step to estimate gradient
-    learningRate = 0.05;
-    int iImage = 0;
+    learningRate = -0.05;
     srand (time(NULL));  // seed random number generator
     while (( iter < maxIterations) && (totalDatasetError() > maxError) ){ 
         TrainItem* item = getRandTrain();
         forwardProp(item->getInputs(), item->getOutputs());
         doABackProp();
         stepByGradient();
+        //printNet();
         std::cout<<"step: "<<iter<<std::endl;
-        std::cout<<" Total dataset error: "<< totalDatasetError()<<std::endl;
+        std::cout<<"Total dataset error: "<< totalDatasetError()<<std::endl;
         iter++;
     }
 }
 
 void NNLib::doABackProp(){
-    
-    //for(int k = 0; k < nOutputs; k++){
-    for (int i = 0; i < net.at(net.size()-1).size(); i++){
-		//deltaOutput[k] = d_activation(netOutput[k])*currentError[k]*2;
-        Neuron* neuI = net.at(net.size()-1).at(i);
+    int l = net.size()-1;
+    std::cout<<l<<std::endl;
+    for (int i = 0; i < net.at(l).size(); i++){
+        Neuron* neuI = net.at(l).at(i);
         neuI->setDelta(d_activation(neuI->getVal())*neuI->getError()*2);
-		//d_biasOutput[k] = deltaOutput[k];
         neuI->setD_Bias(neuI->getDelta());
-		//for (int i = 0; i < nHiddenNeurons; i++){
             
-        for (int j = 0; j < net.at(net.size()-2).size(); j++){
-			//d_weightsOutput[k*nHiddenNeurons + i] = deltaOutput[k]*outHidden[i];
-            Neuron* neuJ = net.at(net.size()-2).at(j);
-            std::cout<<neuJ->getD_Weights()->size()<<" "<<i<<std::endl;
+        for (int j = 0; j < net.at(l-1).size(); j++){
+            Neuron* neuJ = net.at(l-1).at(j);
             neuJ->setD_Weight(i, neuI->getDelta() * neuJ->getVal());
 		}
 
 	}
-	
-	//for (int j = 0; j < nHiddenNeurons; j++){
-    for (int l = net.size()-2; l >= 1; --l){
+    std::cout<<l<<std::endl;
+    for (l = net.size()-2; l >= 1; --l){
+        std::cout<<l<<std::endl;
         for (int j = 0; j < net.at(l).size(); j++){
             Neuron* neuJ = net.at(l).at(j);
-            //double sumDelta = 0;
             float sumDelta = 0;
-            //for (int i = 0; i < nOutputs; i++){
             for (int i = 0; i < net.at(l+1).size(); i++){
                 Neuron* neuI = net.at(l+1).at(i);
-                //sumDelta += deltaOutput[i]*weightsOutput[j*nOutputs + i];
-                sumDelta += neuI->getDelta()*neuI->getWeight(i);
+                sumDelta += neuI->getDelta()*neuJ->getWeight(i);
             }
-            //deltaHidden[j] = sumDelta * d_activation(netHidden[j]);
+            
             neuJ->setDelta(sumDelta*d_activation(neuJ->getVal()));
-            //d_biasHidden[j] = deltaHidden[j];
             neuJ->setD_Bias(neuJ->getDelta());
-            //for (int i = 0; i < nInputs; i++){
             for (int k = 0; k < net.at(l-1).size(); k++){
-                //d_weightsHidden[j*nInputs + i] = deltaHidden[j] * currentInputs[i];
                 Neuron* neuK = net.at(l-1).at(k);
                 neuK->setD_Weight(j, neuJ->getDelta() * neuK->getVal());
             }
@@ -170,10 +159,10 @@ void NNLib::doABackProp(){
 
 void NNLib::stepByGradient(){
 	//bias
-	for (int l = 0; l < net.size(); l++){
+	for (int l = 1; l < net.size(); l++){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron* neu = net.at(l).at(n);
-		    neu->setBias(neu->getBias() + neu->getD_Bias()*learningRate);
+		    neu->setBias(neu->getBias() - neu->getD_Bias()*learningRate);
 	    }
     }
 	
@@ -182,7 +171,7 @@ void NNLib::stepByGradient(){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron* neu = net.at(l).at(n);
 		    for (int w = 0; w < neu->getWeights()->size();w++)
-                neu->setWeight(w, neu->getWeight(w) + neu->getD_Weight(w)*learningRate);
+                neu->setWeight(w, neu->getWeight(w) - neu->getD_Weight(w)*learningRate);
 	    }
     }
 }
@@ -199,40 +188,42 @@ void NNLib::resetVals(){
     }
 }
 
-float NNLib::forwardProp(std::vector<float>* inputs, std::vector<float>* outputs = new std::vector<float>){
-    resetVals();
+float NNLib::forwardProp(std::vector<float>* inputs, std::vector<float>* outputs){
+    
+    int l = 0;
     for (int i = 0; i < net.at(0).size(); i++){
         Neuron* neu = net.at(0).at(i);
-        if (i < inputs->size()){
-            neu->setVal(inputs->at(i));
-        } else {
-            neu->setVal(0);
-        }
+        neu->setVal(inputs->at(i));
     }
-    for (int l = 0; l < net.size()-1; l++){
-        for (int n = 0; n < net.at(l).size(); n++){
-            Neuron* neu = net.at(l).at(n);
-            neu->addVal((neu->getVal()) + (neu->getBias()));
-            for (int nn = 0; nn < net.at(l+1).size(); nn++){
-                net.at(l+1).at(nn)->addVal((neu->getVal()) * (neu->getWeight(nn)));
+
+    for (l = 1; l < net.size(); l++){
+        for (int i = 0; i < net.at(l).size(); i++){
+            Neuron* neuI = net.at(l).at(i);
+            neuI->setVal(neuI->getBias());
+            for (int j = 0; j < net.at(l-1).size(); j++){
+                Neuron* neuJ = net.at(l-1).at(j);
+                neuI->addVal(neuJ->getWeight(i)*neuJ->getVal());
             }
+            neuI->setVal(activation(neuI->getVal()));
         }
     }
+
+    l = net.size()-1;
     float cost = 0;
-    for (int i = 0; i < net.at(net.size()-1).size(); i++){
-        Neuron* neu = net.at(net.size()-1).at(i);
-        neu->setVal(neu->getVal() + neu->getBias());
-        neu->setError(neu->getVal() - outputs->at(i));
-        if (outputs->size() != 0)
-            cost += std::pow(neu->getError(), 2.0);
+    for (int i = 0; i < net.at(l).size(); i++){
+        Neuron* neu = net.at(l).at(i);
+        if (outputs->size() != 0){
+            float e = neu->getVal() - outputs->at(i);
+            neu->setError(e*e);
+            cost += neu->getError();
+        }
     }
-    if (outputs->size() == 0)
-        delete outputs;
     return cost;
 }
 
 void NNLib::getResults(std::vector<float>* inputs){
-    forwardProp(inputs);
+    std::vector<float> out;
+    forwardProp(inputs, &out);
     for (int i = 0; i < net.at(net.size()-1).size(); i++){
         Neuron* neu = net.at(net.size()-1).at(i);
         std::cout<<neu->getVal()<<std::endl;

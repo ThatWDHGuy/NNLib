@@ -22,6 +22,7 @@ class NNLib{
         
     public:
         NNLib();
+        std::vector<std::vector<Neuron*>> getNet();
         void setLayers(std::vector<int>* lays);
         void randWeightBias();
         enum Mode {ALL};
