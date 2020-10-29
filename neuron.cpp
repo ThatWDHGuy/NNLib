@@ -81,6 +81,18 @@ float Neuron::getVal(){
     return val;
 }
 
+void Neuron::setNet(float v){
+    net = v;
+}
+
+void Neuron::addNet(float v){
+    net += v;
+}
+
+float Neuron::getNet(){
+    return net;
+}
+
 std::vector<float>* Neuron::getD_Weights(){
     return &d_weights;
 }

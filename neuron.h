@@ -7,6 +7,7 @@ class Neuron{
         std::vector<float> weights;
         float bias;
         float val;
+        float net;
         float getRand();
         std::vector<float> d_weights;
         float d_bias;
@@ -29,6 +30,9 @@ class Neuron{
         void setVal(float v);
         void addVal(float v);
         float getVal();
+        void setNet(float v);
+        void addNet(float v);
+        float getNet();
         float getD_Weight(int i);
         float getD_Bias();
         std::vector<float>* getD_Weights();

@@ -6,7 +6,7 @@
 namespace fs = std::filesystem;
 
 NNLib::NNLib(){
-
+    
 }
 
 float NNLib::activation(float x)
@@ -46,6 +46,7 @@ void NNLib::randWeightBias(){
         }
     }
 }
+
 void NNLib::makeLinks(Mode m){
     switch (m){
     case ALL:
@@ -53,7 +54,6 @@ void NNLib::makeLinks(Mode m){
         break;
     }
 }
-
 
 void NNLib::linkAllForward(){
     //link all nodes forward
@@ -73,7 +73,7 @@ void NNLib::printNet(){
     for (int l = 0; l < net.size(); l++){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron *neu = net.at(l).at(n);
-            std::cout<<l<<","<<n<<":\n Bias:\n  "<<neu->getBias()<<"\n Weights:"<<std::endl;
+            std::cout<<l<<","<<n<<":\n Val: "<<neu->getVal()<<"\n Bias:\n  "<<neu->getBias()<<"\n Weights:"<<std::endl;
             for (int i = 0; i < neu->getFw()->size(); i++){
                 std::cout<<"  "<<neu->getWeights()->at(i)<<std::endl;
             }
@@ -123,7 +123,7 @@ void NNLib::trainNet(float maxError, int maxIterations){
 
 void NNLib::doABackProp(){
     int l = net.size()-1;
-    std::cout<<l<<std::endl;
+    //std::cout<<l<<std::endl;
     for (int i = 0; i < net.at(l).size(); i++){
         Neuron* neuI = net.at(l).at(i);
         neuI->setDelta(d_activation(neuI->getVal())*neuI->getError()*2);
@@ -135,8 +135,8 @@ void NNLib::doABackProp(){
 		}
 
 	}
-    std::cout<<l<<std::endl;
-    for (l = net.size()-2; l >= 1; --l){
+    //std::cout<<l<<std::endl;
+    for (l = net.size()-2; l >= 1; l--){
         std::cout<<l<<std::endl;
         for (int j = 0; j < net.at(l).size(); j++){
             Neuron* neuJ = net.at(l).at(j);
@@ -146,13 +146,12 @@ void NNLib::doABackProp(){
                 sumDelta += neuI->getDelta()*neuJ->getWeight(i);
             }
             
-            neuJ->setDelta(sumDelta*d_activation(neuJ->getVal()));
+            neuJ->setDelta(sumDelta*d_activation(neuJ->getNet()));
             neuJ->setD_Bias(neuJ->getDelta());
             for (int k = 0; k < net.at(l-1).size(); k++){
                 Neuron* neuK = net.at(l-1).at(k);
                 neuK->setD_Weight(j, neuJ->getDelta() * neuK->getVal());
             }
-
         }
     }
 }
@@ -199,12 +198,12 @@ float NNLib::forwardProp(std::vector<float>* inputs, std::vector<float>* outputs
     for (l = 1; l < net.size(); l++){
         for (int i = 0; i < net.at(l).size(); i++){
             Neuron* neuI = net.at(l).at(i);
-            neuI->setVal(neuI->getBias());
+            neuI->setNet(neuI->getBias());
             for (int j = 0; j < net.at(l-1).size(); j++){
                 Neuron* neuJ = net.at(l-1).at(j);
-                neuI->addVal(neuJ->getWeight(i)*neuJ->getVal());
+                neuI->addNet(neuJ->getWeight(i)*neuJ->getVal());
             }
-            neuI->setVal(activation(neuI->getVal()));
+            neuI->setVal(activation(neuI->getNet()));
         }
     }
 
