@@ -17,6 +17,7 @@ class NNLib{
         void resetVals();
         TrainItem* getRandTrain();
         float totalDatasetError();
+        void stepGradCalc(std::vector<float>* inputs, std::vector<float>* outputs);
         void doABackProp();
         void stepByGradient();
         

@@ -112,13 +112,45 @@ void NNLib::trainNet(float maxError, int maxIterations){
     while (( iter < maxIterations) && (totalDatasetError() > maxError) ){ 
         TrainItem* item = getRandTrain();
         forwardProp(item->getInputs(), item->getOutputs());
-        doABackProp();
+        stepGradCalc(item->getInputs(), item->getOutputs());
+        //doABackProp();
         stepByGradient();
         //printNet();
         std::cout<<"step: "<<iter<<std::endl;
         std::cout<<"Total dataset error: "<< totalDatasetError()<<std::endl;
         iter++;
     }
+}
+
+void NNLib::stepGradCalc(std::vector<float>* inputs, std::vector<float>* outputs){
+
+    for (int l = 0; l < net.size(); l++){
+        std::cout<<l<<std::endl;
+        for (int i = 0; i < net.at(l).size(); i++){
+            float step = 0.001;
+            Neuron* neuI = net.at(l).at(i);
+            float oldError;
+            float oldVal;
+            float newError;
+
+            oldError = forwardProp(inputs, outputs);
+            if (i != 0){
+                oldVal = neuI->getBias();
+                neuI->setBias(oldVal + step);
+                newError = forwardProp(inputs, outputs);
+                neuI->setBias((newError-oldError)/step);
+                neuI->setBias(oldVal);
+            }
+            for (int w = 0; w < neuI->getWeights()->size(); w++){
+                oldVal = neuI->getWeight(w);
+                neuI->setWeight(w, oldVal + step);
+                newError = forwardProp(inputs, outputs);
+                neuI->setD_Weight(w, (newError-oldError)/step);
+                neuI->setWeight(w, oldVal);
+            }
+        }
+    }
+
 }
 
 void NNLib::doABackProp(){
@@ -161,7 +193,7 @@ void NNLib::stepByGradient(){
 	for (int l = 1; l < net.size(); l++){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron* neu = net.at(l).at(n);
-		    neu->setBias(neu->getBias() - neu->getD_Bias()*learningRate);
+		    neu->setBias(neu->getBias() + neu->getD_Bias()*learningRate);
 	    }
     }
 	
@@ -170,7 +202,7 @@ void NNLib::stepByGradient(){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron* neu = net.at(l).at(n);
 		    for (int w = 0; w < neu->getWeights()->size();w++)
-                neu->setWeight(w, neu->getWeight(w) - neu->getD_Weight(w)*learningRate);
+                neu->setWeight(w, neu->getWeight(w) + neu->getD_Weight(w)*learningRate);
 	    }
     }
 }

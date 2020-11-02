@@ -27,7 +27,7 @@ TrainItem* processData(std::string file){
 
 int main(void){
     NNLib nn = NNLib();
-    std::vector<int> i{2,2,1}; 
+    std::vector<int> i{2,20,1}; 
     nn.setLayers(&i);
     nn.makeLinks(nn.ALL);
     
