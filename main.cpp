@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
+#include <regex>
 #include "nnlib.h"
 
 std::vector<TrainItem*> items;
@@ -103,9 +104,16 @@ int main(void){
     nn.trainNet(1, 20000, -0.2, false, false);
 
     while (true) {
-        int a;
-        std::cout<<"Input: ";std::cin >> a;std::cout<<std::endl;
-        nn.getResults(a);
+        std::string a;
+        std::cout<<"Input: ";
+        std::cin.clear();
+        std::cin >> a;
+        std::regex reg("^[0-9]{1,10}$");
+        if (std::regex_match(a, reg)){
+            nn.getResults(std::stoi(a));
+        } else {
+            std::cout<<"Invalid Entry"<<std::endl;
+        }
         std::cout<<std::endl;
     }
     
