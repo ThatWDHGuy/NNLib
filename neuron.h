@@ -8,7 +8,7 @@ class Neuron{
         float bias;
         float val;
         float net;
-        float getRand();
+        float getRand(float min, float max);
         std::vector<float> d_weights;
         float d_bias;
         float delta;
@@ -18,8 +18,8 @@ class Neuron{
         Neuron();
         void addForward(Neuron *f);
         void addBackward(Neuron *b);
-        void randInitWeightBias();
-        void randInitBias();
+        void randInitWeightBias(float min, float max);
+        void randInitBias(float min, float max);
         float getWeight(int i);
         float getBias();
         void setWeight(int i, float v);

@@ -34,15 +34,15 @@ std::vector<std::vector<Neuron*>> NNLib::getNet(){
     return net;
 }
 
-void NNLib::randWeightBias(){
+void NNLib::randWeightBias(float min, float max){
     for (int n = 0; n < net.at(0).size(); n++){
         Neuron *neu = net.at(0).at(n);
-        neu->randInitBias();
+        neu->randInitBias(min, max);
     }
     for (int l = 1; l < net.size(); l++){
         for (int n = 0; n < net.at(l).size(); n++){
             Neuron *neu = net.at(l).at(n);
-            neu->randInitWeightBias();
+            neu->randInitWeightBias(min, max);
         }
     }
 }
@@ -90,9 +90,26 @@ void NNLib::loadTrainingSet(TrainItem* func(std::string)){
     }
 }
 
+void NNLib::loadTrainingFile(std::vector<TrainItem*>* func(std::string)){
+    std::string path = "training";
+    
+    for (const auto & entry : fs::directory_iterator(path)){
+        
+        std::vector<TrainItem*>* returned = func(entry.path().string());
+        std::cout<<returned->size()<<std::endl;
+        for (int i = 0; i < returned->size(); i++){
+            training.push_back(returned->at(i));
+        }
+    }
+}
+
 TrainItem* NNLib::getRandTrain(){
     int a = ((float)rand()/RAND_MAX)*training.size();
     return training.at(a);
+}
+
+TrainItem* NNLib::getTrainItem(int i){
+    return training.at(i);
 }
 
 float NNLib::totalDatasetError(){ // sum of errors for all rows of train data
@@ -108,24 +125,46 @@ void NNLib::trainNet(float maxError, int maxIterations){
     int iter = 0;
     dStep = 0.01;  // step to estimate gradient
     learningRate = -0.05;
-    srand (time(NULL));  // seed random number generator
-    while (( iter < maxIterations) && (totalDatasetError() > maxError) ){ 
+    while (( iter < maxIterations) /*&& (totalDatasetError() > maxError)*/ ){ 
         TrainItem* item = getRandTrain();
+        for (int i = 0 ; i < 8; i++){
+            for ( int j = 0 ; j < 8;j++){
+            if (item->getInputs()->at(i*8 + j) > 0.0){
+                std::cout<<"0";
+            } else {
+                std::cout<<"-";
+            }
+            }
+            std::cout<<std::endl;
+        }
         forwardProp(item->getInputs(), item->getOutputs());
-        stepGradCalc(item->getInputs(), item->getOutputs());
-        //doABackProp();
+        //stepGradCalc(item->getInputs(), item->getOutputs());
+        doABackProp();
         stepByGradient();
-        //printNet();
+        printNet();
         std::cout<<"step: "<<iter<<std::endl;
         std::cout<<"Total dataset error: "<< totalDatasetError()<<std::endl;
         iter++;
     }
 }
 
+void NNLib::resetAllDeltas(){
+     for (int l = 0; l < net.size(); l++){
+        for (int i = 0; i < net.at(l).size(); i++){
+            Neuron* neuI = net.at(l).at(i);
+            for (int i = 0; i < net.at(l).size(); i++){
+                neuI->setD_Bias(0);
+            }
+            for (int w = 0; w < neuI->getWeights()->size(); w++){
+                neuI->setD_Weight(w, 0);
+            }
+        }
+    }
+}
+
 void NNLib::stepGradCalc(std::vector<float>* inputs, std::vector<float>* outputs){
 
     for (int l = 0; l < net.size(); l++){
-        std::cout<<l<<std::endl;
         for (int i = 0; i < net.at(l).size(); i++){
             float step = 0.001;
             Neuron* neuI = net.at(l).at(i);

@@ -1,10 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <ctime>
 #include "nnlib.h"
 
+std::vector<TrainItem*> items;
 
-TrainItem* processData(std::string file){
+std::vector<TrainItem*>* processData(std::string file){
+    /* INDIVIUDAL FILE PER TRAIN
     TrainItem* item = new TrainItem();
     std::vector<float> in;
     std::vector<float> out;
@@ -22,57 +25,83 @@ TrainItem* processData(std::string file){
         c++;
     }
     item->setInOut(in, out);
-    return item;
+    return item;*/
+    items = {};
+    TrainItem* item = new TrainItem();
+    std::vector<float> in;
+    std::vector<float> out;
+    std::ifstream tFile(file, std::ios_base::in);
+    float a;
+    int c = 0;
+    int numInputs = 64;
+    int numOutputs = 8;
+    while (tFile >> a){
+        if (c == numInputs+numOutputs){
+            c = 0;
+            item->setInOut(in, out);
+            items.push_back(item);
+            item = new TrainItem();
+            in.clear();
+            out.clear();
+        }
+        if (c < numInputs){
+            in.push_back((float)a);
+        } else {
+            out.push_back((float)a);
+        }
+        c++;
+    }
+    item->setInOut(in, out);
+    items.push_back(item);
+    item = new TrainItem();
+    in.clear();
+    out.clear();
+    return (&items);
+}
+
+void displayDigit(std::vector<float>* input){
+  for (int i = 0 ; i < 8; i++){
+    for ( int j = 0 ; j < 8;j++){
+       if (input->at(i*8 + j) > 0.0){
+          std::cout<<"0";
+       } else {
+         std::cout<<"-";
+       }
+    }
+    std::cout<<std::endl;
+  }
 }
 
 int main(void){
+    srand (time(NULL));  // seed random number generator
     NNLib nn = NNLib();
-    std::vector<int> i{2,20,1}; 
+    std::vector<int> i{64,128,8}; 
     nn.setLayers(&i);
     nn.makeLinks(nn.ALL);
-    
+    nn.randWeightBias(-1.0, 1.0);
+
     /*Neuron* neu = nn.getNet().at(0).at(0);
     neu->setBias(0);
-    neu->setWeight(0, 1);
-    neu->setWeight(1, -1);
+    neu->setWeight(0, 20);
+    neu->setWeight(1, -20);
     neu = nn.getNet().at(0).at(1);
     neu->setBias(0);
-    neu->setWeight(0, 1);
-    neu->setWeight(1, -1);
+    neu->setWeight(0, 20);
+    neu->setWeight(1, -20);
     neu = nn.getNet().at(1).at(0);
-    neu->setBias(0.5);
-    neu->setWeight(0, 1);
+    neu->setBias(-10);
+    neu->setWeight(0, 20);
     neu = nn.getNet().at(1).at(1);
-    neu->setBias(-1.5);
-    neu->setWeight(0, 1);
+    neu->setBias(30);
+    neu->setWeight(0, 20);
     neu = nn.getNet().at(2).at(0);
-    neu->setBias(1.5);*/
+    neu->setBias(-30);*/
 
-    nn.randWeightBias();
-    nn.printNet();
-    nn.loadTrainingSet(&processData);
+    //nn.printNet();
+    std::cout<<"a"<<std::endl;
+    nn.loadTrainingFile(&processData);
     
-    nn.trainNet(0.01, 1000);
-    /*for (int i = 0; i < nn.getTraining()->size(); i++){
-        std::cout<<i<<std::endl;
-        nn.getTraining()->at(i)->print();
-    }*/
-
-    nn.printNet();
-    std::vector<float> in{0.0, 0.0}; 
-    nn.getResults(&in);
-    //nn.printNet();
-    std::vector<float> in2{1.0, 0.0}; 
-    nn.getResults(&in2);
-    //nn.printNet();
-    std::vector<float> in3{0.0, 1.0}; 
-    nn.getResults(&in3);
-    //nn.printNet();
-    std::vector<float> in4{1.0, 1.0}; 
-    nn.getResults(&in4);
-    //nn.printNet();
-
+    nn.trainNet(0.001, 1000);
     
-
     return 0;
 }
