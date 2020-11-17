@@ -1,5 +1,5 @@
 CC=g++
-CXXFLAGS=-std=c++17 -I. -Wall -Wno-sign-compare
+CXXFLAGS=-std=c++17 -I. -Wall -Wno-sign-compare -O9
 DEPS = neuron.h nnlib.h trainitem.h
 OBJ = main.o neuron.o nnlib.o trainitem.o
 

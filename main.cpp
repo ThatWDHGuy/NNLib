@@ -75,7 +75,7 @@ void displayDigit(std::vector<float>* input){
 int main(void){
     srand (time(NULL));  // seed random number generator
     NNLib nn = NNLib();
-    std::vector<int> i{64,128,8}; 
+    std::vector<int> i{64,32,8}; 
     nn.setLayers(&i);
     nn.makeLinks(nn.ALL);
     nn.randWeightBias(-1.0, 1.0);
@@ -98,10 +98,16 @@ int main(void){
     neu->setBias(-30);*/
 
     //nn.printNet();
-    std::cout<<"a"<<std::endl;
     nn.loadTrainingFile(&processData);
     
-    nn.trainNet(0.001, 1000);
+    nn.trainNet(1, 20000, -0.2, false, false);
+
+    while (true) {
+        int a;
+        std::cout<<"Input: ";std::cin >> a;std::cout<<std::endl;
+        nn.getResults(a);
+        std::cout<<std::endl;
+    }
     
     return 0;
 }

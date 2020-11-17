@@ -2,6 +2,7 @@
 #include <iostream>
 #include <filesystem>
 #include <cmath>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -121,30 +122,58 @@ float NNLib::totalDatasetError(){ // sum of errors for all rows of train data
 	return tde;
 }
 
-void NNLib::trainNet(float maxError, int maxIterations){
+void NNLib::trainNet(float maxError, int maxIterations, float lr, bool backprop, bool printTimes){
     int iter = 0;
     dStep = 0.01;  // step to estimate gradient
-    learningRate = -0.05;
-    while (( iter < maxIterations) /*&& (totalDatasetError() > maxError)*/ ){ 
+    learningRate = lr;
+    while (( iter < maxIterations) && (totalDatasetError() > maxError) ){ 
+        auto start = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds;
+        
         TrainItem* item = getRandTrain();
-        for (int i = 0 ; i < 8; i++){
-            for ( int j = 0 ; j < 8;j++){
-            if (item->getInputs()->at(i*8 + j) > 0.0){
-                std::cout<<"0";
-            } else {
-                std::cout<<"-";
+        if (printTimes){
+            for (int i = 0 ; i < 8; i++){
+                for ( int j = 0 ; j < 8;j++){
+                    if (item->getInputs()->at(i*8 + j) > 0.0){
+                        std::cout<<"0";
+                    } else {
+                        std::cout<<"-";
+                    }
+                }
+                std::cout<<std::endl;
             }
-            }
-            std::cout<<std::endl;
         }
+        auto printedInputs = std::chrono::steady_clock::now();
+        elapsed_seconds = printedInputs-start;
+        if (printTimes) std::cout << "Time to print: " << elapsed_seconds.count() << "s\n";
+
         forwardProp(item->getInputs(), item->getOutputs());
-        //stepGradCalc(item->getInputs(), item->getOutputs());
-        doABackProp();
+
+        auto fp = std::chrono::steady_clock::now();
+        elapsed_seconds = fp-printedInputs;
+        if (printTimes)std::cout << "Time to FP: " << elapsed_seconds.count() << "s\n";
+
+        if (backprop) doABackProp();
+        else stepGradCalc(item->getInputs(), item->getOutputs()); //SLOW
+        
+
+        auto gradCalc = std::chrono::steady_clock::now();
+        elapsed_seconds = gradCalc-fp;
+        if (printTimes)std::cout << "Time to gradCalc: " << elapsed_seconds.count() << "s\n";
+
         stepByGradient();
-        printNet();
-        std::cout<<"step: "<<iter<<std::endl;
-        std::cout<<"Total dataset error: "<< totalDatasetError()<<std::endl;
+
+        auto stepGrad = std::chrono::steady_clock::now();
+        elapsed_seconds = stepGrad-gradCalc;
+        if (printTimes)std::cout << "Time to stepGrad: " << elapsed_seconds.count() << "s\n";
+
+        //printNet();
+        std::cout<<"step: "<<iter<<", Total dataset error: "<< totalDatasetError()<<std::endl;
         iter++;
+
+        auto end = std::chrono::steady_clock::now();
+        elapsed_seconds = end-start;
+        if (printTimes) std::cout << "Total step time: " << elapsed_seconds.count() << "s\n";
     }
 }
 
@@ -297,6 +326,27 @@ void NNLib::getResults(std::vector<float>* inputs){
     for (int i = 0; i < net.at(net.size()-1).size(); i++){
         Neuron* neu = net.at(net.size()-1).at(i);
         std::cout<<neu->getVal()<<std::endl;
+    }
+}
+
+void NNLib::getResults(int num){
+    std::vector<float> out;
+    forwardProp(training.at(num)->getInputs(), &out);
+    TrainItem* item = training.at(num);
+        for (int i = 0 ; i < 8; i++){
+            for ( int j = 0 ; j < 8;j++){
+                if (item->getInputs()->at(i*8 + j) > 0.0){
+                    std::cout<<"0";
+                } else {
+                    std::cout<<"-";
+                }
+            }
+            std::cout<<std::endl;
+        }
+    for (int i = 0; i < net.at(net.size()-1).size(); i++){
+        Neuron* neu = net.at(net.size()-1).at(i);
+        float f = neu->getVal() > 0.9 ? 1 : (neu->getVal() < 0.1 ? 0 :neu->getVal());
+        std::cout<<f<<std::endl;
     }
 }
 

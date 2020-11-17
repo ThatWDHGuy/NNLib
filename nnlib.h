@@ -33,8 +33,9 @@ class NNLib{
         void printNet();
         void loadTrainingSet(TrainItem* func(std::string));
         void loadTrainingFile(std::vector<TrainItem*>* func(std::string));
-        void trainNet(float maxError, int maxIterations);
+        void trainNet(float maxError, int maxIterations, float lr, bool backprop, bool printTimes);
         std::vector<TrainItem*>* getTraining();
         float forwardProp(std::vector<float>* inputs, std::vector<float>* outputs);
         void getResults(std::vector<float>* inputs);
+        void getResults(int num);
 };
