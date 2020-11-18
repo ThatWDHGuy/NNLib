@@ -7,6 +7,14 @@
 class NNLib{
     private:
         float learningRate;
+        float maxTrainError;
+        float maxIter;
+        bool backProp;
+        bool printTrainData;
+        std::vector<int> layerNums;
+        int linkMode;
+        float minWeiBias;
+        float maxWeiBias;
         float dStep;
         std::vector<std::vector<Neuron*>> net;
         std::vector<TrainItem*> training;
@@ -26,19 +34,22 @@ class NNLib{
         void menuEvalOption();
         void menuConfigureOption();
         void menuCheckDatasetOption();
+        void initNet();
+        int getIntInput();
+        float getFloatInput();
         
     public:
         NNLib();
         std::vector<std::vector<Neuron*>> getNet();
-        void setLayers(std::vector<int>* lays);
-        void randWeightBias(float min, float max);
-        enum Mode {ALL};
-        void makeLinks(Mode m);
+        void setLayers();
+        void randWeightBias();
+        enum Mode {ALL = 0};
+        void makeLinks();
         void printNet();
         void loadTrainingSet(TrainItem* func(std::string));
         void loadTrainingFile(std::vector<TrainItem*>* func(std::string));
         void setDataDisplay(void func(std::vector<float>* inputs));
-        void trainNet(float maxError, int maxIterations, float lr, bool backprop, bool printTimes);
+        void trainNet();
         std::vector<TrainItem*>* getTraining();
         float forwardProp(std::vector<float>* inputs, std::vector<float>* outputs);
         void getResults(std::vector<float>* inputs);
