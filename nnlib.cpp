@@ -10,14 +10,16 @@ namespace fs = std::filesystem;
 
 NNLib::NNLib(){
     srand (time(NULL));
-    layerNums = {64,32,8};
-    maxTrainError = 1000;
+    layerNums = {64,16,8};
+    learningRate = -0.25;
+    maxTrainError = 4;
     maxIter = 20000;
     backProp = false;
     printTrainData = false;
     linkMode = ALL;
     minWeiBias = -1.0f;
     maxWeiBias = 1.0f;
+    
 }
 
 void NNLib::cliMenu(){
@@ -30,7 +32,36 @@ void NNLib::cliMenu(){
         checkDataOpt = i++,
         saveOpt = i++,
         loadOpt = i++;
-        std::cout<<initOpt<<") init net\n"<<trainOpt<<") train\n"<<evaluateOpt<<") evaluate\n"<<configureOpt<<") configure net\n"<<checkDataOpt<<") check dataset\n"<<saveOpt<<") save net\n"<<loadOpt<<") load net\nx) exit\nInput:";
+
+        std::string layerStr = "(";
+        for (int i = 0; i < net.size(); i++){
+            layerStr.append(std::to_string(net.at(i).size()));
+            if (i != net.size()-1)
+                layerStr.append(" ");
+        }
+        if (net.size() == 0)
+            layerStr.append("Uninitalized");
+        layerStr.append(") -> (");
+        for (int i = 0; i < layerNums.size(); i++){
+            layerStr.append(std::to_string(layerNums.at(i)));
+            if (i != layerNums.size()-1)
+                layerStr.append(" ");
+        }
+        layerStr.append(")");
+
+        
+
+        std::cout<<\
+        initOpt<<") Init Net - "<<layerStr<<"\n"<<\
+        trainOpt<<") Train\n"<<\
+        evaluateOpt<<") Evaluate\n"<<\
+        configureOpt<<") Configure Net\n"<<\
+        checkDataOpt<<") Check Dataset\n"<<\
+        saveOpt<<") Save Net\n"<<\
+        loadOpt<<") Load Net\n"<<\
+        "x) Exit\n"<<\
+        "Input:";
+
         std::string input;
         std::cin.clear();
         std::cin >> input;
@@ -67,21 +98,26 @@ void NNLib::initNet(){
 }
 
 void NNLib::menuTrainOption(){
+    
     std::cout<<"\n---Training---\n";
+    if (net.size() < 2){
+        std::cout<<"Net not Initalized, not net exists, please initalize\n";
+        return;
+    }
     std::string init;
     bool valid = false;
     std::cin.ignore();
     while (!valid){
-        std::cout<<"Re-initalize? (Y/n)";std::getline(std::cin, init);
+        std::cout<<"Re-randomise weights and bias'? (Y/n)";std::getline(std::cin, init);
         if (init.length() == 0){
             valid = true;
-            initNet();
+            randWeightBias();
         } else {
             switch (init.at(0)){
             case 'Y':
             case 'y':
                 valid = true;
-                initNet();
+                randWeightBias();
                 break;
             case 'N':
             case 'n':
@@ -90,14 +126,11 @@ void NNLib::menuTrainOption(){
             }
         }
     }
-    if (net.size() < 2){
-        std::cout<<"Net not Initalized, not net exists, please initalize\n";
-    } else{
-        trainNet();
-    }
+    trainNet();
 }
 
 void NNLib::menuEvalOption(){
+    
     std::cout<<"\n---Evaluating---\n";
     if (net.size() < 2){
         std::cout<<"Net not Initalized, not net exists, please initalize\n";
@@ -126,14 +159,6 @@ void NNLib::menuEvalOption(){
 }
 
 void NNLib::menuConfigureOption(){
-    //need to be able to configure:
-    // - net layout.
-    // - min error
-    // - max iterations
-    // - LR
-    // - print and backprop toggle
-    // - min / max rand weight bias
-    // - boolean to randomize before training
     while (1){
         int i = 1,
         netLayoutOpt = i++,
@@ -145,16 +170,26 @@ void NNLib::menuConfigureOption(){
         maxRandWeiBiasOpt = i++,
         printTrainDataOpt = i++;
 
+        std::string layerStr = "(";
+        for (int i = 0; i < layerNums.size(); i++){
+            layerStr.append(std::to_string(layerNums.at(i)));
+            if (i != layerNums.size()-1)
+                layerStr.append(" ");
+        }
+        layerStr.append(")");
+
+        
+
         std::cout<<\
-        netLayoutOpt<<") Edit Net Layout: "<<layerNums.at(0)<<"\n"<<\
+        netLayoutOpt<<") Edit Net Layout: "<<layerStr<<"\n"<<\
         backpropOpt<<") Toggle BackProp: "<<(backProp?"True":"False")<<"\n"<<\
         maxTrainErrorOpt<<") Edit Max Training Error: "<<maxTrainError<<"\n"<<\
         maxIterationsOpt<<") Edit Max Training Iterations: "<<maxIter<<"\n"<<\
         LearningrateOpt<<") Edit Learning Rate: "<<learningRate<<"\n"<<\
-        minRandWeiBiasOpt<<") Edit Min Random Weight Bias: "<<minRandWeiBiasOpt<<"\n"<<\
-        maxRandWeiBiasOpt<<") Edit Max Random Weight Bias: "<<maxRandWeiBiasOpt<<"\n"<<\
+        minRandWeiBiasOpt<<") Edit Min Random Weight Bias: "<<minWeiBias<<"\n"<<\
+        maxRandWeiBiasOpt<<") Edit Max Random Weight Bias: "<<maxWeiBias<<"\n"<<\
         printTrainDataOpt<<") Toggle Print Training Data: "<<(printTrainData?"True":"False")<<"\n"<<\
-        "x) exit\n"<<\
+        "x) Exit\n"<<\
         "Input:";
 
         std::string input;
@@ -164,7 +199,7 @@ void NNLib::menuConfigureOption(){
         a -= '0';
 
         if (netLayoutOpt == a) { /* Edit Net Layout */
-            
+            setNewLayerSizes();
         } else if (backpropOpt == a) { /* Toggle BackProp */
             backProp = !backProp;
         } else if (maxTrainErrorOpt == a) { /* Edit Max Training Error */
@@ -198,10 +233,32 @@ void NNLib::menuConfigureOption(){
     }
 }
 
+void NNLib::setNewLayerSizes(){
+    int layerCount = 1;
+    std::vector<int> lays = {};
+    while (1) {
+        std::string input;
+        std::cout<<"Enter number of neurons in layer "<<layerCount++<<": ('x' to end layer input)";
+        std::cin.clear();
+        std::cin >> input;
+        std::regex reg("^[1-9]{1}[0-9]*$");
+        char a = input.at(0);
+        if (std::regex_match(input, reg)) { /* evaluate */
+            lays.push_back(std::stoi(input));
+        } else if (a == 'x'){ /* exit */
+            break;
+        }else { /* invalid */
+            std::cout<<"Invalid Entry"<<std::endl;
+        }
+    }
+    if (lays.size() != 0)
+        layerNums = lays;
+}
+
 int NNLib::getIntInput(){
     while (1) {
         std::string input;
-        std::cout<<"Input a Float: ";
+        std::cout<<"Input an Int: ";
         std::cin.clear();
         std::cin >> input;
         std::regex reg("^-?[0-9]+$");
@@ -379,6 +436,7 @@ void NNLib::trainNet(){
     int iter = 0;
     dStep = 0.01;  // step to estimate gradient
     while (( iter < maxIter) && (totalDatasetError() > maxTrainError) ){
+        
         std::chrono::steady_clock::time_point start, printedInputs, fp, gradCalc, stepGrad, end;
         if (printTrainData) start = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds;

@@ -37,6 +37,7 @@ class NNLib{
         void initNet();
         int getIntInput();
         float getFloatInput();
+        void setNewLayerSizes();
         
     public:
         NNLib();

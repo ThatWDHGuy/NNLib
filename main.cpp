@@ -58,6 +58,5 @@ int main(void){
     nn.setDataDisplay(&displayData);
     nn.loadTrainingFile(&processData);
     nn.cliMenu();
-
     return 0;
 }
