@@ -3,11 +3,79 @@
 #include <filesystem>
 #include <cmath>
 #include <chrono>
+#include <regex>
 
 namespace fs = std::filesystem;
 
 NNLib::NNLib(){
+    srand (time(NULL));
+}
+
+void NNLib::cliMenu(){
+    while (1){
+        std::cout<<"1) train\n2) evaluate\n3) configure net\n4) check dataset\n5) save net\n6) load net\nx) exit\nInput:";
+        std::string input;
+        std::cin.clear();
+        std::cin >> input;
+        char a = input.at(0);
+        if (a == '1') { /* train */
+            menuTrainOption();
+        } else if (a == '2'){ /*evaluate*/
+            menuEvalOption();
+        } else if (a == '3'){ /*configure net*/
+        } else if (a == '4'){ /*check dataset*/
+        } else if (a == '5'){ /*save net*/
+        } else if (a == '6'){ /*load net*/
+        } else if (a == 'x'){ /*exit*/
+            break;
+        }else { /* invalid */
+            std::cout<<"Invalid Entry"<<std::endl;
+        }
+        std::cout<<std::endl;
+    }
+}
+
+void NNLib::menuTrainOption(){
+    std::vector<int> l{64,32,8}; 
+    setLayers(&l);
+    makeLinks(ALL);
+    randWeightBias(-1.0, 1.0);
+    trainNet(1000, 20000, -0.2, false, false);
+}
+
+void NNLib::menuEvalOption(){
+    while (1) {
+        std::string input;
+        std::cout<<"\n---Training---\nInput from dataset: ";
+        std::cin.clear();
+        std::cin >> input;
+        std::regex reg("^[0-9]{1,10}$");
+        char a = input.at(0);
+        if (std::regex_match(input, reg)) { /* evaluate */
+            int num = std::stoi(input);
+            if (num >=0 && num < training.size()){
+                getResults(num);
+            } else {
+                std::cout<<"input out of bounds (0-"<<training.size()-1<<")"<<std::endl;
+            }
+        } else if (a == 'x'){ /* exit */
+            break;
+        }else { /* invalid */
+            std::cout<<"Invalid Entry"<<std::endl;
+        }
+    }
+}
+
+void NNLib::menuConfigureOption(){
+
+}
+
+void NNLib::menuCheckDatasetOption(){
     
+}
+
+void NNLib::setDataDisplay(void func(std::vector<float>* inputs)){
+    dataDisplay = func;
 }
 
 float NNLib::activation(float x)
@@ -15,7 +83,6 @@ float NNLib::activation(float x)
     return 1.0/(1.0 + std::exp(-x));
 }
 
-// derivative of activation function
 float NNLib::d_activation(float x){
     return (1.0 - activation(x))*activation(x);
 }  
@@ -132,16 +199,7 @@ void NNLib::trainNet(float maxError, int maxIterations, float lr, bool backprop,
         
         TrainItem* item = getRandTrain();
         if (printTimes){
-            for (int i = 0 ; i < 8; i++){
-                for ( int j = 0 ; j < 8;j++){
-                    if (item->getInputs()->at(i*8 + j) > 0.0){
-                        std::cout<<"0";
-                    } else {
-                        std::cout<<"-";
-                    }
-                }
-                std::cout<<std::endl;
-            }
+            dataDisplay(item->getInputs());
         }
         auto printedInputs = std::chrono::steady_clock::now();
         elapsed_seconds = printedInputs-start;
@@ -323,6 +381,7 @@ float NNLib::forwardProp(std::vector<float>* inputs, std::vector<float>* outputs
 void NNLib::getResults(std::vector<float>* inputs){
     std::vector<float> out;
     forwardProp(inputs, &out);
+    dataDisplay(inputs);
     for (int i = 0; i < net.at(net.size()-1).size(); i++){
         Neuron* neu = net.at(net.size()-1).at(i);
         std::cout<<neu->getVal()<<std::endl;
@@ -332,17 +391,7 @@ void NNLib::getResults(std::vector<float>* inputs){
 void NNLib::getResults(int num){
     std::vector<float> out;
     forwardProp(training.at(num)->getInputs(), &out);
-    TrainItem* item = training.at(num);
-        for (int i = 0 ; i < 8; i++){
-            for ( int j = 0 ; j < 8;j++){
-                if (item->getInputs()->at(i*8 + j) > 0.0){
-                    std::cout<<"0";
-                } else {
-                    std::cout<<"-";
-                }
-            }
-            std::cout<<std::endl;
-        }
+    dataDisplay(training.at(num)->getInputs());
     for (int i = 0; i < net.at(net.size()-1).size(); i++){
         Neuron* neu = net.at(net.size()-1).at(i);
         float f = neu->getVal() > 0.9 ? 1 : (neu->getVal() < 0.1 ? 0 :neu->getVal());

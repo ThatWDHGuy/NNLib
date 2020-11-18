@@ -10,7 +10,7 @@ class NNLib{
         float dStep;
         std::vector<std::vector<Neuron*>> net;
         std::vector<TrainItem*> training;
-
+        void (*dataDisplay)(std::vector<float>*);
         float activation(float x);
         float d_activation(float x);
         void linkAllForward();
@@ -22,6 +22,10 @@ class NNLib{
         void doABackProp();
         void stepByGradient();
         void resetAllDeltas();
+        void menuTrainOption();
+        void menuEvalOption();
+        void menuConfigureOption();
+        void menuCheckDatasetOption();
         
     public:
         NNLib();
@@ -33,9 +37,11 @@ class NNLib{
         void printNet();
         void loadTrainingSet(TrainItem* func(std::string));
         void loadTrainingFile(std::vector<TrainItem*>* func(std::string));
+        void setDataDisplay(void func(std::vector<float>* inputs));
         void trainNet(float maxError, int maxIterations, float lr, bool backprop, bool printTimes);
         std::vector<TrainItem*>* getTraining();
         float forwardProp(std::vector<float>* inputs, std::vector<float>* outputs);
         void getResults(std::vector<float>* inputs);
         void getResults(int num);
+        void cliMenu();
 };
