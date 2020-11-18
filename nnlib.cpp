@@ -24,6 +24,7 @@ void NNLib::cliMenu(){
             menuEvalOption();
         } else if (a == '3'){ /*configure net*/
         } else if (a == '4'){ /*check dataset*/
+            menuCheckDatasetOption();
         } else if (a == '5'){ /*save net*/
         } else if (a == '6'){ /*load net*/
         } else if (a == 'x'){ /*exit*/
@@ -36,17 +37,18 @@ void NNLib::cliMenu(){
 }
 
 void NNLib::menuTrainOption(){
-    std::vector<int> l{64,32,8}; 
+    std::cout<<"\n---Training---\n";
+    std::vector<int> l{64,32,8};  // make all below private variables
     setLayers(&l);
     makeLinks(ALL);
     randWeightBias(-1.0, 1.0);
-    trainNet(1000, 20000, -0.2, false, false);
+    trainNet(1000, 20000, -0.2, false, false); // can split all above into another method so it doesnt need to reinitalize the net every training
 }
 
 void NNLib::menuEvalOption(){
     while (1) {
         std::string input;
-        std::cout<<"\n---Training---\nInput from dataset: ";
+        std::cout<<"\n---Evaluating---\nInput from dataset: ";
         std::cin.clear();
         std::cin >> input;
         std::regex reg("^[0-9]{1,10}$");
@@ -67,11 +69,37 @@ void NNLib::menuEvalOption(){
 }
 
 void NNLib::menuConfigureOption(){
-
+    //need to be able to configure:
+    // - net layout.
+    // - min error
+    // - max iterations
+    // - LR
+    // - print and backprop toggle
+    // - min / max rand weight bias
+    //  - boolean to randomize before training
 }
 
 void NNLib::menuCheckDatasetOption(){
-    
+    while (1) {
+        std::string input;
+        std::cout<<"\n---DataSet Validation---\nInput from dataset: ";
+        std::cin.clear();
+        std::cin >> input;
+        std::regex reg("^[0-9]{1,10}$");
+        char a = input.at(0);
+        if (std::regex_match(input, reg)) { /* evaluate */
+            int num = std::stoi(input);
+            if (num >=0 && num < training.size()){
+                dataDisplay(training.at(num)->getInputs());
+            } else {
+                std::cout<<"input out of bounds (0-"<<training.size()-1<<")"<<std::endl;
+            }
+        } else if (a == 'x'){ /* exit */
+            break;
+        }else { /* invalid */
+            std::cout<<"Invalid Entry"<<std::endl;
+        }
+    }
 }
 
 void NNLib::setDataDisplay(void func(std::vector<float>* inputs)){
