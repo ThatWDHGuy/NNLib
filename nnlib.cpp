@@ -19,7 +19,7 @@ NNLib::NNLib(){
     linkMode = ALL;
     minWeiBias = -1.0f;
     maxWeiBias = 1.0f;
-    
+    roundOutput = false;
 }
 
 void NNLib::cliMenu(){
@@ -168,7 +168,9 @@ void NNLib::menuConfigureOption(){
         LearningrateOpt = i++,
         minRandWeiBiasOpt = i++,
         maxRandWeiBiasOpt = i++,
-        printTrainDataOpt = i++;
+        printTrainDataOpt = i++,
+        roundOutputOpt = i++;
+
 
         std::string layerStr = "(";
         for (int i = 0; i < layerNums.size(); i++){
@@ -189,6 +191,7 @@ void NNLib::menuConfigureOption(){
         minRandWeiBiasOpt<<") Edit Min Random Weight Bias: "<<minWeiBias<<"\n"<<\
         maxRandWeiBiasOpt<<") Edit Max Random Weight Bias: "<<maxWeiBias<<"\n"<<\
         printTrainDataOpt<<") Toggle Print Training Data: "<<(printTrainData?"True":"False")<<"\n"<<\
+        roundOutputOpt<<") Toggle Output Rounding: "<<(roundOutput?"True":"False")<<"\n"<<\
         "x) Exit\n"<<\
         "Input:";
 
@@ -224,6 +227,8 @@ void NNLib::menuConfigureOption(){
                 maxTrainError = f;
         } else if (printTrainDataOpt == a) { /* Toggle Print Training Data */
             printTrainData = !printTrainData;
+        } else if (roundOutputOpt == a) { /* Toggle Output rounding Data */
+            roundOutput = !roundOutput;
         } else if ('x' == a + '0'){ /*exit*/
             break;
         }else { /* invalid */
@@ -531,21 +536,18 @@ void NNLib::stepGradCalc(std::vector<float>* inputs, std::vector<float>* outputs
 
 void NNLib::doABackProp(){
     int l = net.size()-1;
-    //std::cout<<l<<std::endl;
     for (int i = 0; i < net.at(l).size(); i++){
         Neuron* neuI = net.at(l).at(i);
         neuI->setDelta(d_activation(neuI->getVal())*neuI->getError()*2);
         neuI->setD_Bias(neuI->getDelta());
-            
+        std::cout<<neuI->getDelta()<<std::endl;
         for (int j = 0; j < net.at(l-1).size(); j++){
             Neuron* neuJ = net.at(l-1).at(j);
             neuJ->setD_Weight(i, neuI->getDelta() * neuJ->getVal());
 		}
 
 	}
-    //std::cout<<l<<std::endl;
     for (l = net.size()-2; l >= 1; l--){
-        std::cout<<l<<std::endl;
         for (int j = 0; j < net.at(l).size(); j++){
             Neuron* neuJ = net.at(l).at(j);
             float sumDelta = 0;
@@ -644,8 +646,15 @@ void NNLib::getResults(int num){
     dataDisplay(training.at(num)->getInputs());
     for (int i = 0; i < net.at(net.size()-1).size(); i++){
         Neuron* neu = net.at(net.size()-1).at(i);
-        float f = neu->getVal() > 0.9 ? 1 : (neu->getVal() < 0.1 ? 0 :neu->getVal());
+        float f = roundOutput ? (neu->getVal() > 0.5 ? 1 : 0) : neu->getVal();
         std::cout<<f<<std::endl;
     }
 }
 
+void NNLib::saveNet(){
+
+}
+
+void NNLib::loadNet(){
+
+}

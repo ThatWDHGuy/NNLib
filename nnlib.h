@@ -6,6 +6,7 @@
 
 class NNLib{
     private:
+        bool roundOutput;
         float learningRate;
         float maxTrainError;
         float maxIter;
@@ -38,6 +39,8 @@ class NNLib{
         int getIntInput();
         float getFloatInput();
         void setNewLayerSizes();
+        void saveNet();
+        void loadNet();
         
     public:
         NNLib();
